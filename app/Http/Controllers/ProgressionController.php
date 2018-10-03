@@ -52,7 +52,7 @@ class ProgressionController extends Controller
     {
         $user = Auth::user();
         if($user->user_type_id == 1):
-            $skills = Skill::select('skills.id as id','skills.name as name','module_id as module_id', 'modules.name as module_name')
+            $skills = Skill::select('skills.id as id','skills.name as name', 'skills.is_mandatory','module_id as module_id', 'modules.name as module_name')
                 ->join('modules', 'modules.id', 'skills.module_id')
                 ->where('module_id', $moduleId)
                 ->get();
