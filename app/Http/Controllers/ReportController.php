@@ -193,8 +193,9 @@ class ReportController extends Controller
         $myFormationIds = FormationDetail::
         select(DB::raw('DISTINCT(formation_details.formation_id) as id, formations.name as name'))
         ->join('formations','formations.id','=','formation_details.formation_id')
-        ->where('formation_details.teacher_id',Auth::user()->id)->get();
-        
+        ->where('formation_details.teacher_id',Auth::user()->id)
+        ->get();
+        // dd($myFormationIds);
         //Run through Formations Ids and get all reports
         foreach($myFormationIds as $formation):
           $reports = Report::
@@ -212,16 +213,17 @@ class ReportController extends Controller
             ->join('students', 'students.user_id', 'reports.student_id')
             ->where('students.formation_id', $formation->id)      
             ->get()->toArray();
+            // dd($reports);
             
             foreach($reports as $key=>$report):
               $reports[$key]['formation_name'] = $formation->name;
               
               $user = User::where('id', $report['student_id'])->select('lastname', 'firstname')->get();
-      
-              $reports[$key]['student'] = $user[0];
+              // dd($user);
+              $reports[$key]['student'] = $user;
+              return Response::json($reports);
             endforeach;
           endforeach;
-        return Response::json($reports);
       else:
         return Response::json(["Erreur : "=>"Vous n'avez pas les droits"]);
       endif;
