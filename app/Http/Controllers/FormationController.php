@@ -224,8 +224,29 @@ class FormationController extends Controller
                     $totalSkills = Progression::select('progressions.id')
                         ->get();
 
+                    $total_skills_validated_by_teacher = Progression::select('progressions.id')
+                        ->where('progressions.teacher_validation', 1)
+                        ->get();
+
+                    $total_skills_validated_by_student = Progression::select('progressions.id')
+                    ->where('progressions.student_validation', 1)
+                    ->get();
+
+                    $total_skills_to_validate_by_teacher = Progression::select('progressions.id')
+                        ->where('progressions.teacher_validation', 0)
+                        ->get();
+
+                    $total_skills_to_validate_by_student = Progression::select('progressions.id')
+                        ->where('progressions.student_validation', 0)
+                        ->get();
+
                     $myFormations[$key]['modules'] = $module;
                     $myFormations[$key]['total_students'] = $user->count();
+                    $myFormations[$key]['total_skills'] = $totalSkills->count();
+                    $myFormations[$key]['total_skills_validated_by_teacher'] = $total_skills_validated_by_teacher->count();
+                    $myFormations[$key]['total_skills_validated_by_student'] = $total_skills_validated_by_student->count();
+                    $myFormations[$key]['total_skills_to_validate_by_teacher'] = $total_skills_to_validate_by_teacher->count();
+                    $myFormations[$key]['total_skills_to_validate_by_student'] = $total_skills_to_validate_by_student->count();
                 endforeach;
 
             return Response::json($myFormations);

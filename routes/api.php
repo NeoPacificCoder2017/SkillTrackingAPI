@@ -13,8 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::post('password/forgot', 'PasswordResetController@create');
 Route::get('password/find/{token}', 'PasswordResetController@find');
+Route::post('password/forgot', 'PasswordResetController@create');
 Route::post('password/reset', 'PasswordResetController@reset');
 
 /**
