@@ -151,8 +151,10 @@ class CalendarController extends Controller
     {
       if(Auth::user()->user_type_id == 2):
         $formationIds = User::getCurrentFormationForTeacher();
-        $calendar = Calendar::select('*')->whereIn('formation_id', $formationIds)->get();
-        return Response::json($calendar);
+        $calendars = Calendar::select('calendars.id as calendar_id','calendars.file_url as calendar_file_url','formations.id as formation_id','formations.name as formation_name','formations.logo as formation_logo')
+        ->join('formations','formations.id','calendars.formation_id')
+        ->whereIn('formation_id', $formationIds)->get();
+        return Response::json($calendars);
       else:
         return Response::json(["Erreur : "=>"Vous n'avez pas les droits"]);
       endif;
@@ -165,9 +167,11 @@ class CalendarController extends Controller
     public function getStudentsCalendar()
     {
       $formationId = User::getMyCurrentFormation()->formation_id;
-      $calendar = Calendar::select('*')
-        ->where('formation_id', $formationId)
-        ->get();
+      $calendar = Calendar::select('calendars.*','formations.*')
+        ->join('formations','formations.id','calendars.formation_id')
+        ->where('calendars.formation_id', $formationId)
+        ->get()->first();
+
         return response::json($calendar);
     }
 }
