@@ -209,7 +209,7 @@ class FormationController extends Controller
                     formations.end_at'))
                 ->join('formations','formations.id','=','formation_details.formation_id')
                 ->where('formation_details.teacher_id',$teacher->id)
-                ->paginate(25);
+                ->get();
                 foreach($myFormations as $key=> $myFormation):
                     $module = FormationDetail::where('teacher_id', Auth::user()->id)
                         ->select('modules.name', 'modules.id')
