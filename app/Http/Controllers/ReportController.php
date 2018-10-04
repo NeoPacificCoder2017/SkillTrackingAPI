@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Report;
 use App\User;
 use App\Formation;
@@ -9,14 +7,12 @@ use App\FormationDetail;
 use App\ReportComment;
 use App\Student;
 use App\Http\Resources\Report as ReportR;
-
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
-
 class ReportController extends Controller
 {
     public function reportsForAdmin()
@@ -26,7 +22,6 @@ class ReportController extends Controller
           return response::json($reports);
       endif;
     }
-
     public function reportForAdminByStudentId($studentId)
     {
       if(Auth::user()->user_type_id == 1):
@@ -47,7 +42,6 @@ class ReportController extends Controller
         if($dateFilter !== 'allDate') :
           $reports->where('date', $dateFilter);
         endif;
-
         if($userFilter !== 'allUser') :
           $reports->where('student_id', $userFilter);
         endif;
@@ -57,7 +51,6 @@ class ReportController extends Controller
         return Response::json(["Erreur : "=>"Vous n'avez pas les droits"]);
       endif;
     }
-
     /**
      * Get a student's report 
      * Return Response
@@ -65,7 +58,6 @@ class ReportController extends Controller
     
      public function getReportsByFormationIdAndStudentId($reportId, $formationId)
      {
-
       // dd($formationId);
       $reportByFormationId = Report::
         select('reports.id as report_id',
@@ -95,16 +87,13 @@ class ReportController extends Controller
             $reportByFormationId[$key]['student'] = $user;
             $reportByFormationId[$key]['comments'] = $reportComment;
         endforeach;
-
       return Response::json($reportByFormationId);
-
      }
      
     /**
      * Get all the reports of a formation
      * Return Response
      */
-
     public function getReportsCreator()
     {
       $report = Report::select('student_id')->get();
@@ -114,8 +103,6 @@ class ReportController extends Controller
         ->get();
         return response::json($student);
     }
-
-
     /**
     * Get one report by reportId
     */
@@ -156,7 +143,6 @@ class ReportController extends Controller
     public function getreportsByFormationId($formationId)
     {
       if(Auth::user()->user_type_id == 2):
-
         // dd($formationId);
         $reportByFormationId = Report::
           select('reports.id as report_id',
@@ -180,7 +166,6 @@ class ReportController extends Controller
       
               $reportByFormationId[$key]['student'] = $user;
           endforeach;
-
         return Response::json($reportByFormationId);
       else:
         return Response::json(["Erreur : "=>"Vous n'avez pas les droits"]);
@@ -231,7 +216,6 @@ class ReportController extends Controller
         return Response::json(["Erreur : "=>"Vous n'avez pas les droits"]);
       endif;
     }
-
     public function show($reportId)
     {
       if(Auth::user()->user_type_id == 1):
@@ -244,12 +228,10 @@ class ReportController extends Controller
           return Response::json(["Erreur : "=>"Vous n'avez pas les droits"]);
       endif;
     }
-
     public function store(Request $request)
     {
         $authUserId = Auth::user()->id;
         $authUserTypeId = Auth::user()->user_type_id;
-
         //si la méthode est un put, on effectue la modification
         if($authUserTypeId):
           if($request->isMethod('put')):
@@ -272,7 +254,6 @@ class ReportController extends Controller
               if($report->save()):
                 return new ReportR($report);
               endif;
-
             endif;
           
           //fin de la modification, ici on crée un nouveau commentaire
@@ -291,12 +272,10 @@ class ReportController extends Controller
           return Response::json(['error'=>"Accès non autorisé"]);
         endif;
     }
-
     public function destroy($reportId)
     {
       $report = Report::findOrFail($reportId);
       $authUserTypeId = Auth::user()->user_type_id;
-
       if($authUserTypeId == 1):
         if($report->delete()):
           return new ReportR($report);
@@ -305,8 +284,6 @@ class ReportController extends Controller
         return Response::json(['error'=>"Accès non autorisé"]);
       endif;
     }
-
-
     /**
      * Récupération des rapports de la formation auquelle l'étudiant connecté appartient
      */
@@ -321,17 +298,14 @@ class ReportController extends Controller
       ->where('students.user_id', $authUserId)
       ->orderBy('students.id', 'desc')
       ->get()->first();
-
       $reports = Report::select('reports.id as report_id','student_id', 'students.formation_id as formation_id','users.firstname as studentFirstname', 'users.lastname as studentLastname','reports.updated_at as last_edit_date', 'reports.created_at as created_date', 'reports.title as report_title',  'rate', 'text', 'is_daily')
       ->leftjoin('users', 'users.id', 'reports.student_id')
       ->leftjoin('students', 'students.user_id', 'reports.student_id')
       ->where('students.formation_id', $formationData->formation_id)
       ->where('reports.student_id', Auth::user()->id)
       ->paginate(25);
-
       // dd($authUserId);
       return Response::json($reports);
-
     }
     public function getStudentsReportByFormationId()
     {
@@ -344,18 +318,14 @@ class ReportController extends Controller
         ->orderBy('students.id', 'desc')
         ->get()->first();
         // dd($formationData);
-
       $reports = Report::select('reports.id as report_id','student_id', 'formations.name','students.formation_id as formation_id','users.firstname as studentFirstname', 'users.lastname as studentLastname','reports.updated_at as last_edit_date', 'reports.created_at as created_date', 'reports.date as report_date','reports.title as report_title', 'reports.rate as report_rate','text', 'is_daily')
-        ->join('users', 'users.id', 'reports.student_id')
         ->join('students', 'students.user_id', 'reports.student_id')
+        ->join('users', 'users.id', 'students.user_id')
         ->join('formations', 'formations.id', 'students.formation_id')
         ->where('students.formation_id', $formationData->formation_id)
         // ->where('reports.', Auth::user()->id)
         ->paginate(25);
-
       // dd($authUserId);
       return Response::json($reports);
-
     }
-
 }
