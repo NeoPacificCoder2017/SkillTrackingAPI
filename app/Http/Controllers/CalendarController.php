@@ -165,9 +165,11 @@ class CalendarController extends Controller
     public function getStudentsCalendar()
     {
       $formationId = User::getMyCurrentFormation()->formation_id;
-      $calendar = Calendar::select('*')
-        ->where('formation_id', $formationId)
-        ->get();
+      $calendar = Calendar::select('calendars.*','formations.*')
+        ->join('formations','formations.id','calendars.formation_id')
+        ->where('calendars.formation_id', $formationId)
+        ->get()->first();
+
         return response::json($calendar);
     }
 }

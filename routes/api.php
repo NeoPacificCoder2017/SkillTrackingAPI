@@ -142,8 +142,8 @@ Route::post('password/reset', 'PasswordResetController@reset');
     Route::get('report/getStudentsReportByFormation', 'ReportController@getStudentsReportByFormationId');
     //=======================Récupération d'un reports par son id
     Route::get('report/{reportId}', 'ReportController@show');
-    Route::get('reportsByFormation/{formationId}', 'ReportController@getreportsByFormationId');
-    Route::get('reportofStudent/{studentId}/of/{formationId}', 'ReportController@getReportsByFormationIdAndStudentId');
+    Route::get('reportsByFormation/{formationId}', 'ReportController@getReportsByFormationId');
+    Route::get('reportofStudent/{reportId}', 'ReportController@getReportsByFormationIdAndStudentId');
     //=======================Création d'une report
     Route::post('report/create', 'ReportController@store');
     //=======================Supression d'une report
