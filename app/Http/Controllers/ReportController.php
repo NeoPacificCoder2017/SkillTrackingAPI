@@ -208,9 +208,12 @@ class ReportController extends Controller
                   'reports.is_daily as report_is_daily',
                   'reports.created_at',
                   'reports.updated_at',
-                  'students.formation_id as formation_id'
+                  'students.formation_id as formation_id',
+                  'users.firstname as studentFirstname',
+                  'users.lastname as studentLastname'
                   )
             ->join('students', 'students.user_id', 'reports.student_id')
+            ->join('users', 'users.id', 'students.user_id')
             ->where('students.formation_id', $formation->id)      
             ->get()->toArray();
             // dd($reports);
@@ -220,7 +223,7 @@ class ReportController extends Controller
               
               $user = User::where('id', $report['student_id'])->select('lastname', 'firstname')->get();
               // dd($user);
-              $reports[$key]['student'] = $user;
+              // $reports[$key]['student'] = $user;
               return Response::json($reports);
             endforeach;
           endforeach;
