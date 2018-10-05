@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Report;
 use App\User;
 use App\Formation;
@@ -9,7 +7,6 @@ use App\FormationDetail;
 use App\ReportComment;
 use App\Student;
 use App\Http\Resources\Report as ReportR;
-
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth; 
