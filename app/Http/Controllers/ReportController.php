@@ -179,39 +179,44 @@ class ReportController extends Controller {
     if(Auth::user()->user_type_id == 2):
       //Get all formations Ids of teacher
       $myFormationIds = FormationDetail::
-      select(DB::raw('DISTINCT(formation_details.formation_id) as id, formations.name as name'))
+      select(DB::raw('DISTINCT(formation_details.formation_id) as id, formations.name as name, formations.logo as logo'))
       ->join('formations','formations.id','=','formation_details.formation_id')
       ->where('formation_details.teacher_id',Auth::user()->id)
       ->get();
       // dd($myFormationIds);
       //Run through Formations Ids and get all reports
       foreach($myFormationIds as $formation):
-        $reports = Report::
-        select('reports.id as report_id',
-        'reports.student_id as student_id',
-        'reports.date as report_date',
-        'reports.rate as report_rate',
-        'reports.title as report_title',
-        'reports.text as report_text',
-        'reports.is_daily as report_is_daily',
-        'reports.created_at',
-        'reports.updated_at',
-        'students.formation_id as formation_id'
+        $reports = Report::select(
+          'reports.id as report_id',
+          'reports.updated_at as report_last_edit_date', 
+          'reports.created_at as report_created_date', 
+          'reports.date as report_date',
+          'reports.title as report_title', 
+          'reports.rate as report_rate',
+          'text as report_text', 
+          'is_daily as report_is_daily',
+          'students.id as studentId', 
+          'students.formation_id as formation_id',
+          'users.firstname as studentFirstname', 
+          'users.lastname as studentLastname', 
+          'users.avatar as studentAvatar'
         )
-        ->join('students', 'students.user_id', 'reports.student_id')
+        ->join('students', 'students.id', 'reports.student_id')
+        ->join('users', 'students.user_id', 'users.id')
         ->where('students.formation_id', $formation->id)      
         ->get()->toArray();
         // dd($reports);
         
         foreach($reports as $key=>$report):
-          $reports[$key]['formation_name'] = $formation->name;
-          
-          $user = User::where('id', $report['student_id'])->select('lastname', 'firstname')->get();
-          // dd($user);
-          $reports[$key]['student'] = $user;
-          return Response::json($reports);
+          $reports[$key]['formationName'] = $formation->name;
+          $reports[$key]['formationLogo'] = $formation->name;
+
+          $comments = ReportComment::where('report_comments.report_id', $report->report_id)->get();
+          $reports[$key]['comments'] = $comments;
         endforeach;
       endforeach;
+
+      return Response::json($reports);
     else:
       return Response::json(["Erreur : "=>"Vous n'avez pas les droits"]);
     endif;
