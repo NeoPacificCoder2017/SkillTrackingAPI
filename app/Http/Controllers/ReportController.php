@@ -178,42 +178,40 @@ class ReportController extends Controller {
   {
     if(Auth::user()->user_type_id == 2):
       //Get all formations Ids of teacher
-      $myFormationIds = FormationDetail::
-      select(DB::raw('DISTINCT(formation_details.formation_id) as id, formations.name as name, formations.logo as logo'))
-      ->join('formations','formations.id','=','formation_details.formation_id')
-      ->where('formation_details.teacher_id',Auth::user()->id)
-      ->get();
-      // dd($myFormationIds);
-      //Run through Formations Ids and get all reports
-      foreach($myFormationIds as $formation):
-        $reports = Report::select(
-          'reports.id as report_id',
-          'reports.updated_at as report_last_edit_date', 
-          'reports.created_at as report_created_date', 
-          'reports.date as report_date',
-          'reports.title as report_title', 
-          'reports.rate as report_rate',
-          'text as report_text', 
-          'is_daily as report_is_daily',
-          'students.id as studentId', 
-          'students.formation_id as formation_id',
-          'users.firstname as studentFirstname', 
-          'users.lastname as studentLastname', 
-          'users.avatar as studentAvatar'
-        )
-        ->join('students', 'students.id', 'reports.student_id')
-        ->join('users', 'students.user_id', 'users.id')
-        ->where('students.formation_id', $formation->id)      
-        ->get()->toArray();
-        // dd($reports);
-        
-        foreach($reports as $key=>$report):
-          $reports[$key]['formationName'] = $formation->name;
-          $reports[$key]['formationLogo'] = $formation->name;
+      //$myFormationIds = FormationDetail::
+      // select(DB::raw('DISTINCT(formation_details.formation_id) as id, formations.name as name, formations.logo as logo'))
+      // ->join('formations','formations.id','=','formation_details.formation_id')
+      // ->where('formation_details.teacher_id',Auth::user()->id)
+      // ->get();
+      $myFormationIds = FormationDetail::select(DB::raw('DISTINCT(formation_details.formation_id)'))->where('teacher_id',Auth::user()->id)->pluck('formation_id')->toArray();
+      $students = Student::whereIn('formation_id',$myFormationIds)->pluck('id')->toArray();
 
-          $comments = ReportComment::where('report_comments.report_id', $report->report_id)->get();
-          $reports[$key]['comments'] = $comments;
-        endforeach;
+      $reports = Report::select(
+        'reports.id as report_id',
+        'reports.updated_at as report_last_edit_date', 
+        'reports.created_at as report_created_date', 
+        'reports.date as report_date',
+        'reports.title as report_title', 
+        'reports.rate as report_rate',
+        'text as report_text', 
+        'is_daily as report_is_daily',
+        'students.id as studentId', 
+        'students.formation_id as formation_id',
+        'formations.name as formationName',
+        'formations.logo as formationLogo',
+        'users.firstname as studentFirstname', 
+        'users.lastname as studentLastname', 
+        'users.avatar as studentAvatar'
+      )
+      ->join('students', 'students.id', 'reports.student_id')
+      ->join('users', 'students.user_id', 'users.id')
+      ->join('formations', 'formations.id', 'students.formation_id')
+      ->whereIn('reports.student_id', $students) 
+      ->get()->toArray();
+      
+      foreach($reports as $key=>$report):
+        $comments = ReportComment::where('report_comments.report_id', $report['report_id'])->get();
+        $reports[$key]['comments'] = $comments;
       endforeach;
 
       return Response::json($reports);
